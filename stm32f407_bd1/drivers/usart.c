@@ -87,20 +87,17 @@ struct stm32_uart
 
 static void DMA_Configuration(struct rt_serial_device *serial);
 
-static int stm32_configure(struct rt_serial_device *serial, struct termios *cfg)
+static int stm32_configure(struct rt_serial_device *serial, struct serial_configure *cfg)
 {
     struct stm32_uart* uart;
     USART_InitTypeDef USART_InitStructure;
-    tcflag_t cflag;
 
     uart = (struct stm32_uart *)serial->parent.user_data;
 
-	cflag = cfg->c_cflag;
-
-    USART_InitStructure.USART_BaudRate = cfg->c_speed;
+    USART_InitStructure.USART_BaudRate = cfg->baud_rate;
     USART_InitStructure.USART_WordLength = USART_WordLength_8b;
  
-    if (cflag & CSTOPB)
+    if (cfg->stop_bits == STOP_BITS_2)
 	{
 	    USART_InitStructure.USART_StopBits = USART_StopBits_2;
 	}
@@ -109,20 +106,17 @@ static int stm32_configure(struct rt_serial_device *serial, struct termios *cfg)
 	    USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	}
 	
-	if (cflag & PARENB)
+	switch (cfg->parity)
 	{
-	    if (cflag & PARODD)
-		{
+		case PARITY_ODD:
 		    USART_InitStructure.USART_Parity = USART_Parity_Odd;
-		}
-		else
-		{
+		break;
+    case PARITY_EVEN:
 		    USART_InitStructure.USART_Parity = USART_Parity_Even;
-		}
-	}
-	else
-	{
+		break;
+    case PARITY_NONE:
 	    USART_InitStructure.USART_Parity = USART_Parity_No;
+	    break;
 	}
 
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
@@ -356,8 +350,8 @@ static const struct rt_uart_ops stm32_uart_ops =
 {
 	stm32_init,
 	stm32_deinit,
-	stm32_control,
     stm32_configure,
+	stm32_control,
     stm32_putc,
     stm32_getc,
 };
