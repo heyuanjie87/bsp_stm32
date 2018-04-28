@@ -1,0 +1,6 @@
+
+T0F64 000:246 SEGGER J-Link V6.16c Log File (0002ms, 0026ms total)
+T0F64 000:246 DLL Compiled: Jun 16 2017 18:14:49 (0002ms, 0026ms total)
+T0F64 000:246 Logging started @ 2018-03-08 15:34 (0002ms, 0026ms total)
+T0F64 000:248 JLINK_SetWarnOutHandler(...) (0010ms, 0036ms total)
+T0F64 000:258 JLINK_OpenEx(...)Out of sync , resynchronizing...

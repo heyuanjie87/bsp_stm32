@@ -1,0 +1,303 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             |.text|, CODE, READONLY, ALIGN=
+2
+    2 00000000                 THUMB
+    3 00000000                 REQUIRE8
+    4 00000000                 PRESERVE8
+    5 00000000         
+    6 00000000         ;/*
+    7 00000000         ; * void* lwp_get_sys_api(rt_uint32_t number);
+    8 00000000         ; */
+    9 00000000                 IMPORT           lwp_get_sys_api
+   10 00000000                 IMPORT           lwp_get_kernel_sp
+   11 00000000                 IMPORT           lwp_set_kernel_sp
+   12 00000000         
+   13 00000000         lwp_exit
+                               PROC
+   14 00000000                 EXPORT           lwp_exit
+   15 00000000         
+   16 00000000 F04F 0300       MOV              R3, #0x00
+   17 00000004 F383 8814       MSR              CONTROL, R3
+   18 00000008 4770            bx               lr
+   19 0000000A                 ENDP
+   20 0000000A         
+   21 0000000A         ;/*
+   22 0000000A         ; * void lwp_user_entry(u32 R0_text_addr, u32 R1_data_ad
+                       dr);
+   23 0000000A         ; */
+   24 0000000A         lwp_user_entry
+                               PROC
+   25 0000000A                 EXPORT           lwp_user_entry
+   26 0000000A         
+   27 0000000A B503            PUSH             {R0-R1,lr}  ; push text&data ad
+                                                            dr.
+   28 0000000C         
+   29 0000000C 4668            MOV              R0, SP      ; v1 = SP
+   30 0000000E F100 0040       add              r0, #64
+   31 00000012 F7FF FFFE       BL               lwp_set_kernel_sp ; lwp_set_ker
+                                                            nel_sp(v1)
+   32 00000016         
+   33 00000016 E8BD 4003       POP              {R0-R1,lr}  ; pop app address t
+                                                            o R1.
+   34 0000001A         
+   35 0000001A         ; set CPU to user-thread mode.
+   36 0000001A F3EF 8214       MRS              R2, CONTROL
+   37 0000001E F042 0203       ORR              R2, R2, #0x03 ; use PSP, user-t
+                                                            hread mode.
+   38 00000022 F382 8814       MSR              CONTROL, R2
+   39 00000026         
+   40 00000026         ; set data address.
+   41 00000026 4689            MOV              R9, R1
+   42 00000028         
+   43 00000028         ; run app, only Thumb-mode.
+   44 00000028 F040 0001       ORR              R0, R0, #0x01
+   45 0000002C 4700            BX               R0
+   46 0000002E         
+   47 0000002E         ; never reach here!
+   48 0000002E                 ENDP
+   49 0000002E         
+   50 0000002E         lwp_bin_entry
+                               PROC
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   51 0000002E                 EXPORT           lwp_bin_entry
+   52 0000002E         
+   53 0000002E B503            PUSH             {R0-R1,lr}  ; push text&data ad
+                                                            dr.
+   54 00000030         
+   55 00000030 4668            MOV              R0, SP      ; v1 = SP
+   56 00000032 F100 0040       add              r0, #64
+   57 00000036 F7FF FFFE       BL               lwp_set_kernel_sp ; lwp_set_ker
+                                                            nel_sp(v1)
+   58 0000003A         
+   59 0000003A E8BD 4003       POP              {R0-R1,lr}  ; pop app address t
+                                                            o R1.
+   60 0000003E         
+   61 0000003E         ; set CPU to user-thread mode.
+   62 0000003E F3EF 8314       MRS              R3, CONTROL
+   63 00000042 F043 0303       ORR              R3, R3, #0x03 ; use PSP, user-t
+                                                            hread mode.
+   64 00000046 F383 8814       MSR              CONTROL, R3
+   65 0000004A         
+   66 0000004A         ; set data address.
+   67 0000004A F04F 0900       MOV              R9, #0
+   68 0000004E         
+   69 0000004E         ; run app, only Thumb-mode.
+   70 0000004E F040 0001       ORR              R0, R0, #0x01
+   71 00000052 4700            BX               R0
+   72 00000054         
+   73 00000054         ; never reach here!
+   74 00000054                 ENDP
+   75 00000054         
+   76 00000054         ;/*
+   77 00000054         ; * void SVC_Handler(void);
+   78 00000054         ; */
+   79 00000054         SVC_Handler
+                               PROC
+   80 00000054                 EXPORT           SVC_Handler
+   81 00000054         
+   82 00000054 E92D 4FF0       PUSH             {r4-r11,lr}
+   83 00000058         
+   84 00000058         ; get user SP.
+   85 00000058 F01E 0F04       TST              LR, #0x4
+   86 0000005C BF0C            ITE              EQ
+   87 0000005E F3EF 8C08       MRSEQ            R12, MSP
+   88 00000062 F3EF 8C09       MRSNE            R12, PSP
+   89 00000066         
+   90 00000066         ; get SVC number.
+   91 00000066 F8DC 0018       LDR              R0, [R12, #24] 
+                                                            ; get the app LR.
+   92 0000006A F810 0C02       LDRB             R0, [R0, #-2] ; get the SVC No.
+                                                             from instruction.
+   93 0000006E         
+   94 0000006E         ; get kernel system API
+   95 0000006E F7FF FFFE       BL               lwp_get_sys_api
+   96 00000072         
+   97 00000072         ; push api
+   98 00000072 B401            PUSH             {R0}
+   99 00000074         
+  100 00000074         ; get kernel SP to R0.
+  101 00000074 F7FF FFFE       BL               lwp_get_kernel_sp
+  102 00000078         
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+  103 00000078         ; copy R1(app SP) to R0(server SP).
+  104 00000078 F8DC 4014       ldr              R4, [R12, #20] ; update LR
+  105 0000007C F8DC 5018       ldr              R5, [R12, #24] 
+                                                            ; update api to PC
+  106 00000080 E920 0030       STMFD            r0!, {r4 - r5} ; push exception
+                                                            _stack_frame to ser
+                                                            ver SP.
+  107 00000084         
+  108 00000084 F7FF FFFE       BL               lwp_set_kernel_sp
+  109 00000088         
+  110 00000088         ; set to thread-privilege mode.
+  111 00000088 F04F 0300       MOV              R3, #0x00
+  112 0000008C F383 8814       MSR              CONTROL, R3
+  113 00000090         
+  114 00000090         ; call api.
+  115 00000090 BC04            POP              {R2}        ; pop api to R2.
+  116 00000092         
+  117 00000092 480C            LDR              R0, =svc_exit
+  118 00000094 F8CC 0014       STR              R0, [R12, #20] ; update LR
+  119 00000098 F8CC 2018       STR              R2, [R12, #24] 
+                                                            ; update api to PC
+  120 0000009C         
+  121 0000009C E8BD 4FF0       POP              {r4-r11,lr}
+  122 000000A0 4770            BX               LR
+  123 000000A2         
+  124 000000A2                 ENDP
+  125 000000A2         
+  126 000000A2         ;/*
+  127 000000A2         ; * void svc_exit(void);
+  128 000000A2         ; */
+  129 000000A2         svc_exit
+                               PROC
+  130 000000A2                 EXPORT           svc_exit
+  131 000000A2         
+  132 000000A2         ; get user SP.
+  133 000000A2 B401            PUSH             {R0}        ; push result to SP
+                                                            .
+  134 000000A4 F7FF FFFE       BL               lwp_get_kernel_sp
+  135 000000A8 C806            LDMFD            R0!, {r1 - r2} ; pop app {R4 - 
+                                                            R11}
+  136 000000AA         
+  137 000000AA B406            push             {r1-r2}
+  138 000000AC F7FF FFFE       BL               lwp_set_kernel_sp
+  139 000000B0 BC06            pop              {r1-r2}
+  140 000000B2         
+  141 000000B2         ; restore to PSP & thread-unprivilege mode.
+  142 000000B2 F04F 0303       MOV              R3, #0x03
+  143 000000B6 F383 8814       MSR              CONTROL, R3
+  144 000000BA         
+  145 000000BA         ; return to lwp.
+  146 000000BA BC01            pop              {r0}
+  147 000000BC 468E            mov              lr,r1
+  148 000000BE F042 0201       ORR              R2, R2, #0x01 
+                                                            ; only Thumb-mode.
+  149 000000C2 4710            BX               R2          ; return to user ap
+                                                            p.
+  150 000000C4         
+  151 000000C4                 ENDP
+  152 000000C4         
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+  153 000000C4                 ALIGN
+  154 000000C4         
+  155 000000C4                 END
+              00000000 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\build\lwp_rvds.d -o.\build\lwp_rvds.o -I.\RTE\_rt-thread_stm3
+2f4xx -I"D:\Program Files\keil\Keil\STM32F4xx_DFP\2.12.0\Drivers\CMSIS\Device\S
+T\STM32F4xx\Include" -I"D:\Program Files\keil\ARM\CMSIS\Include" --predefine="_
+_UVISION_VERSION SETA 524" --predefine="STM32F407xx SETA 1" --list=.\build\lwp_
+rvds.lst ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+.text 00000000
+
+Symbol: .text
+   Definitions
+      At line 1 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      None
+Comment: .text unused
+SVC_Handler 00000054
+
+Symbol: SVC_Handler
+   Definitions
+      At line 79 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      At line 80 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+Comment: SVC_Handler used once
+lwp_bin_entry 0000002E
+
+Symbol: lwp_bin_entry
+   Definitions
+      At line 50 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      At line 51 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+Comment: lwp_bin_entry used once
+lwp_exit 00000000
+
+Symbol: lwp_exit
+   Definitions
+      At line 13 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      At line 14 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+Comment: lwp_exit used once
+lwp_user_entry 0000000A
+
+Symbol: lwp_user_entry
+   Definitions
+      At line 24 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      At line 25 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+Comment: lwp_user_entry used once
+svc_exit 000000A2
+
+Symbol: svc_exit
+   Definitions
+      At line 129 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      At line 117 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+      At line 130 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+
+6 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+lwp_get_kernel_sp 00000000
+
+Symbol: lwp_get_kernel_sp
+   Definitions
+      At line 10 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      At line 101 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+      At line 134 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+
+lwp_get_sys_api 00000000
+
+Symbol: lwp_get_sys_api
+   Definitions
+      At line 9 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      At line 95 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+Comment: lwp_get_sys_api used once
+lwp_set_kernel_sp 00000000
+
+Symbol: lwp_set_kernel_sp
+   Definitions
+      At line 11 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+   Uses
+      At line 31 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+      At line 57 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+      At line 108 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+      At line 138 in file ..\..\rt-thread_stdio\components\lwp\lwp_rvds.S
+
+3 symbols
+344 symbols in table

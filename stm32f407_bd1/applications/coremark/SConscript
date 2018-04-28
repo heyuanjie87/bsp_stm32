@@ -1,0 +1,17 @@
+from building import *
+
+cwd = GetCurrentDir()
+src	= Split('''
+core_list_join.c
+core_main.c
+core_matrix.c
+core_state.c
+core_util.c
+rtthread/core_portme.c
+rtthread/ee_printf.c
+''')
+CPPPATH = [cwd]
+
+group = DefineGroup('TestSuite', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')

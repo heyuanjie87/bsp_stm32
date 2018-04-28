@@ -1,0 +1,21 @@
+import rtconfig
+Import('RTT_ROOT')
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+
+# The set of source files associated with this SConscript file.
+src = Split("""
+src/easyflash.c
+src/ef_env.c
+src/ef_env_wl.c
+src/ef_utils.c
+port/ef_port.c
+""")
+
+path = [cwd + '/inc']
+
+group = DefineGroup('EasyFlash', src, depend = [''], CPPPATH = path)
+
+Return('group')

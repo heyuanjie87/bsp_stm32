@@ -1,0 +1,21 @@
+import rtconfig
+Import('RTT_ROOT')
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+
+# The set of source files associated with this SConscript file.
+src = Split("""
+Ethernet/socket.c
+Ethernet/wizchip_conf.c
+Ethernet/W5500/w5500.c
+Internet/DHCP/dhcp.c
+Internet/DNS/dns.c
+""")
+
+path = [cwd + '/Ethernet', cwd + '/Internet/DHCP', cwd + '/Internet/DNS']
+
+group = DefineGroup('ioLibrary', src, depend = [''], CPPPATH = path)
+
+Return('group')
