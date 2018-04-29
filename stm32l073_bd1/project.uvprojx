@@ -53,7 +53,7 @@
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
           <DebugInformation>1</DebugInformation>
-          <BrowseInformation>0</BrowseInformation>
+          <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\build\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER, STM32L0X2, RT_USING_ARM_LIBC</Define>
               <Undefine></Undefine>
-              <IncludePath>..\hallib_l0\STM32L0xx_HAL_Driver\Inc;..\hallib_l0\CMSIS\Device\ST\STM32L0xx\Include;..\hallib_l0\CMSIS\Include;applications;.;drivers;drivers..\Drivers\CMSIS\Device\ST\STM32L0xx\Include;..\..\rt-thread_stdio\include;..\..\rt-thread_stdio\libcpu\arm\cortex-m0;..\..\rt-thread_stdio\libcpu\arm\common;..\..\rt-thread_stdio\components\dfs\include;..\..\rt-thread_stdio\components\drivers\include;..\..\rt-thread_stdio\components\drivers\include;..\..\rt-thread_stdio\components\libc\cruntime\armlibc</IncludePath>
+              <IncludePath>..\hallib_l0\STM32L0xx_HAL_Driver\Inc;..\hallib_l0\CMSIS\Device\ST\STM32L0xx\Include;..\hallib_l0\CMSIS\Include;applications;.;drivers;drivers..\Drivers\CMSIS\Device\ST\STM32L0xx\Include;..\..\rt-thread_stdio\include;..\..\rt-thread_stdio\libcpu\arm\cortex-m0;..\..\rt-thread_stdio\libcpu\arm\common;..\..\rt-thread_stdio\components\dfs\include;..\..\rt-thread_stdio\components\drivers\include;..\..\rt-thread_stdio\components\drivers\include;..\..\rt-thread_stdio\components\finsh;..\..\rt-thread_stdio\components\libc\cruntime\armlibc;..\..\rt-thread_stdio\components\utilities\shcmd</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -369,7 +369,7 @@
             <ScatterFile></ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
-            <Misc> --keep *.o(.rti_fn.*) </Misc>
+            <Misc> --keep *.o(.rti_fn.*)   --keep *.o(FSymTab)</Misc>
             <LinkerInputFile></LinkerInputFile>
             <DisabledWarnings></DisabledWarnings>
           </LDads>
@@ -697,6 +697,36 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>finsh</GroupName>
+          <Files>
+            <File>
+              <FileName>shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread_stdio\components\finsh\shell.c</FilePath>
+            </File>
+            <File>
+              <FileName>symbol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread_stdio\components\finsh\symbol.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread_stdio\components\finsh\cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>msh.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread_stdio\components\finsh\msh.c</FilePath>
+            </File>
+            <File>
+              <FileName>msh_file.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread_stdio\components\finsh\msh_file.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>libc</GroupName>
           <Files>
             <File>
@@ -725,6 +755,9 @@
               <FilePath>..\..\rt-thread_stdio\components\libc\cruntime\armlibc\time.c</FilePath>
             </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>Utilities</GroupName>
         </Group>
       </Groups>
     </Target>

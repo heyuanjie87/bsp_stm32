@@ -68,7 +68,7 @@
 #define RT_USING_DEVICE_IPC
 // <bool name="RT_USING_SERIAL" description="Using Serial" default="true" />
 #define RT_USING_SERIAL
-#define RT_TERMIOS_SPEED    57600
+#define RT_TERMIOS_SPEED    115200
 
 /* SECTION: Console options */
 //#define RT_USING_CONSOLE
@@ -78,7 +78,7 @@
 #define RT_CONSOLE_DEVICE_NAME	    "uart1"
 
 /* SECTION: finsh, a C-Express shell */
-//#define RT_USING_FINSH
+#define RT_USING_FINSH
 /* Using symbol table */
 #define FINSH_USING_SYMTAB
 #define FINSH_USING_DESCRIPTION

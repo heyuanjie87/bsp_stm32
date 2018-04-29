@@ -118,10 +118,10 @@ static int stm32_control(struct rt_serial_device *serial, int cmd, void *arg)
         __HAL_UART_ENABLE_IT((&huart1), UART_IT_RXNE);
         break;
 	case SERIAL_CTRL_TXSTART:
-		__HAL_UART_ENABLE_IT((&huart1), UART_IT_RXNE);
+		__HAL_UART_ENABLE_IT((&huart1), UART_IT_TXE);
 		break;
 	case SERIAL_CTRL_TXSTOP:
-		__HAL_UART_DISABLE_IT(&huart1, UART_IT_RXNE);
+		__HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
 		break;
     }
 
@@ -201,11 +201,8 @@ void USART1_IRQHandler(void)
     {
         rt_hw_serial_isr(&serial1, RT_SERIAL_EVENT_RX_IND);
     }
-    if (__HAL_UART_GET_IT(&huart1, UART_IT_TC))
+    if (__HAL_UART_GET_IT(&huart1, UART_IT_TXE))
     {
-        /* clear interrupt */
-        __HAL_UART_DISABLE_IT(&huart1, UART_IT_TC);
-        __HAL_UART_CLEAR_IT(&huart1, UART_CLEAR_TCF);
         rt_hw_serial_isr(&serial1, RT_SERIAL_EVENT_TX_DONE);
     }
     /* leave interrupt */
@@ -228,9 +225,11 @@ static void GPIO_Configuration(void)
     GPIO_InitStruct.Pin = GPIO_PIN_9;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Alternate = GPIO_AF4_USART1;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
     GPIO_InitStruct.Pin = GPIO_PIN_10;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
