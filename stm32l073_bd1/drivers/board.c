@@ -15,12 +15,16 @@
 
 #include <rthw.h>
 #include <rtthread.h>
-#ifdef RT_USING_FINSH
-#include <finsh.h>
-#endif
 
 #include "board.h"
-#include "usart.h"
+
+#ifdef __CC_ARM
+extern int Image$$RW_IRAM1$$ZI$$Limit;
+#elif __ICCARM__
+#pragma section="HEAP"
+#else
+extern int __bss_end;
+#endif
 
 /**
  * @addtogroup STM32
@@ -84,37 +88,6 @@ static void RCC_Configuration(void)
     }
 }
 
-#ifdef PRINT_RCC_FREQ_INFO
-/**
- * print RCC freq information
- *
- * for example:
- *
- * SYSCLK_Frequency is 48000000HZ
- * PCLK_Frequency is 48000000HZ
- * HCLK_Frequency is 48000000HZ
- * CECCLK_Frequency is 32786HZ
- * ADCCLK_Frequency is 14000000HZ
- * USART1CLK_Frequency is 48000000HZ
- * I2C1CLK_Frequency is 8000000HZ
- * SystemCoreClock is 48000000HZ
- *
- */
-void print_rcc_freq_info(void)
-{
-    rt_uint32_t clkval;
-
-    clkval = HAL_RCC_GetSysClockFreq();//sysclk
-    rt_kprintf("\nSYSCLK_Frequency is %dHZ", clkval);
-    clkval = HAL_RCC_GetHCLKFreq();    //Hclk
-    rt_kprintf("\nHCLK_Frequency is %dHZ", clkval);
-    clkval = HAL_RCC_GetPCLK1Freq();   //pclk1
-    rt_kprintf("\nPCLK1_Frequency is %dHZ", clkval);
-    clkval = HAL_RCC_GetPCLK2Freq();   //pclk2
-    rt_kprintf("\nPCLK2_Frequency is %dHZ", clkval);
-}
-#endif
-
 /**
  * This is the timer interrupt service routine.
  *
@@ -129,6 +102,7 @@ void SysTick_Handler(void)
 	/* leave interrupt */
 	rt_interrupt_leave();
 }
+
 /**
  * This function will initial STM32 board.
  */
@@ -141,24 +115,19 @@ void rt_hw_board_init()
 	RCC_Configuration();
 	SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
 
+#ifdef __CC_ARM
+    rt_system_heap_init((void*)&Image$$RW_IRAM1$$ZI$$Limit, (void*)STM32_SRAM_END);
+#elif __ICCARM__
+    rt_system_heap_init(__segment_end("HEAP"), (void*)STM32_SRAM_END);
+#else
+    /* init memory system */
+    rt_system_heap_init((void*)&__bss_end, (void*)STM32_SRAM_END);
+#endif
+
     /* Call components board initial (use INIT_BOARD_EXPORT()) */
 #ifdef RT_USING_COMPONENTS_INIT
     rt_components_board_init();
 #endif
-#ifdef RT_USING_CONSOLE
-	rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
-#endif
-    /* Print RCC freq info */
-#ifdef PRINT_RCC_FREQ_INFO
-	print_rcc_freq_info();
-#endif
 }
-
-long cmd_reset(int argc, char** argv)
-{
-    HAL_NVIC_SystemReset();
-    return 0;
-}
-FINSH_FUNCTION_EXPORT_ALIAS(cmd_reset, __cmd_reset, Reset Board);
 
 /*@}*/

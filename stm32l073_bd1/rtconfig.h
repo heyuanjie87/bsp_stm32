@@ -59,7 +59,8 @@
 // <bool name="RT_USING_COMPONENTS_INIT" description="Using RT-Thread components initialization" default="true" />
 #define RT_USING_COMPONENTS_INIT
 #define RT_USING_LIBC
-
+#define RT_USING_USER_MAIN
+#define RT_MAIN_THREAD_STACK_SIZE 2048
 /* SECTION: Device System */
 /* Using Device System */
 #define RT_USING_DEVICE
@@ -81,7 +82,8 @@
 /* Using symbol table */
 #define FINSH_USING_SYMTAB
 #define FINSH_USING_DESCRIPTION
-
+#define FINSH_USING_MSH
+#define FINSH_USING_MSH_ONLY
 //#define RT_USING_PIN
 
 //#define RT_USING_CAN
