@@ -4050,14 +4050,6 @@ int rt_hw_stm32_eth_init(void)
     stm32_eth_device.dev_addr[4] = *(rt_uint8_t*)(0x1FFF7A10+2);
     stm32_eth_device.dev_addr[5] = *(rt_uint8_t*)(0x1FFF7A10+0);
 
-    stm32_eth_device.parent.parent.init       = rt_stm32_eth_init;
-    stm32_eth_device.parent.parent.open       = rt_stm32_eth_open;
-    stm32_eth_device.parent.parent.close      = rt_stm32_eth_close;
-    stm32_eth_device.parent.parent.read       = rt_stm32_eth_read;
-    stm32_eth_device.parent.parent.write      = rt_stm32_eth_write;
-    stm32_eth_device.parent.parent.control    = rt_stm32_eth_control;
-    stm32_eth_device.parent.parent.user_data  = RT_NULL;
-
     stm32_eth_device.parent.eth_rx     = rt_stm32_eth_rx;
     stm32_eth_device.parent.eth_tx     = rt_stm32_eth_tx;
 
